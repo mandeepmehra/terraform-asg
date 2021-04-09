@@ -1,6 +1,6 @@
 resource "aws_instance" "myec2" {
   ami           = var.ami_id
-  key_name      = "tf training"
+  key_name      = "mandeep"
   instance_type = "t2.micro"
   tags = {
     Name = "ASExample-mandeep"
@@ -27,6 +27,13 @@ resource "aws_security_group" "sg" {
   }
 
   ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -44,4 +51,45 @@ resource "aws_launch_configuration" "launchConfig" {
                 nohup busybox httpd -f -p 8080 &
                 EOF
   security_groups = [aws_security_group.sg.id]
+}
+
+resource "aws_autoscaling_group" "asg" {
+  launch_configuration = aws_launch_configuration.launchConfig.id
+  min_size             = 2
+  max_size             = 3
+  health_check_type    = "ELB"
+  load_balancers       = [aws_elb.elb.id]
+}
+
+resource "aws_security_group" "elbsg" {
+  name = "elbsg-mandeep"
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+data "aws_availability_zones" "allazs" {
+
+}
+
+resource "aws_elb" "elb" {
+  name               = "ASGExample-Mandeep"
+  security_groups    = [aws_security_group.elbsg.id]
+  availability_zones = data.aws_availability_zones.allazs.names
+  listener {
+    lb_port           = 80
+    lb_protocol       = "http"
+    instance_port     = "8080"
+    instance_protocol = "http"
+  }
+  health_check {
+    timeout             = 3
+    interval            = 30
+    target              = "HTTP:8080/"
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+  }
 }
