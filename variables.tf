@@ -1,3 +1,3 @@
 variable "ami_id" {
-  default = "ami-0742b4e673072066f"
+  default = "ami-05d72852800cbf29e"
 }

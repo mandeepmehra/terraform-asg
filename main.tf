@@ -44,7 +44,7 @@ resource "aws_security_group" "sg" {
 resource "aws_launch_configuration" "launchConfig" {
   image_id        = var.ami_id
   instance_type   = "t2.micro"
-  key_name        = "tf training"
+  key_name        = "mandeep"
   user_data       = <<-EOF
                 #!/bin/bash
                 echo "Hello World" > index.html
@@ -93,4 +93,8 @@ resource "aws_elb" "elb" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
   }
+}
+
+output "elb_dns" {
+    value = aws_elb.elb.dns_name
 }
