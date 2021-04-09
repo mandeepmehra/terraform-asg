@@ -59,6 +59,7 @@ resource "aws_autoscaling_group" "asg" {
   max_size             = 3
   health_check_type    = "ELB"
   load_balancers       = [aws_elb.elb.id]
+  availability_zones   = data.aws_availability_zones.allazs.names
 }
 
 resource "aws_security_group" "elbsg" {
